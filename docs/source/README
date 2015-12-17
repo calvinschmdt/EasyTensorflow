@@ -1,0 +1,5 @@
+Run `sphinx-apidoc -o . ../../easy_tensorflow' in this directory.
+
+This will generate `modules.rst' and `easy_tensorflow.rst'.
+
+Then include `modules.rst' in your `index.rst' file.
