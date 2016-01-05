@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Provides objects that allow for easy setup, training, and running of neural networks, based on Google's tensorflow library. Also allows for the evolution of effective networks using a genetic algorithm derived from the DEAP package."""
 
-from easy_tensorflow import metadata
+from easy_tensorflow import metadata, tf_functions, evolve_functions
 
 
 __version__ = metadata.version

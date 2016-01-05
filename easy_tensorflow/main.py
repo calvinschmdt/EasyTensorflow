@@ -7,7 +7,7 @@ from __future__ import print_function
 import argparse
 import sys
 
-from easy_tensorflow import metadata
+from easy_tensorflow import metadata, tf_functions, evolve_functions
 
 
 def main(argv):

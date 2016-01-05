@@ -1,216 +1,199 @@
 =========================
- Python Project Template
+ Easy Tensorflow
 =========================
 
-.. image:: https://travis-ci.org/seanfisk/python-project-template.png
-   :target: https://travis-ci.org/seanfisk/python-project-template
+This module provides users with methods for the automated building, training, and testing of complex neural networks using Goggle's Tensorflow module. The project includes objects that perform both regression and classification tasks.
 
-This project provides a best-practices template Python project which integrates several different tools. It saves you work by setting up a number of things, including documentation, code checking, and unit test runners.
+In addition, there is a function included that uses the DEAP genetic algorithm package to evolve the optimal network architecture. The evolution function is almost entirely based off of the sample DEAP evolution.
 
-As it is an all-in-one solution, the tools used are rather opinionated. They include:
-
-* Paver_ for running miscellaneous tasks
-* Setuptools_ for distribution (Setuptools and Distribute_ have merged_)
-* Sphinx_ for documentation
-* flake8_ for source code checking
-* pytest_ for unit testing
-* mock_ for mocking (not required by the template, but included anyway)
-* tox_ for testing on multiple Python versions
-
-If you are new to Python or new to creating Python projects, see Kenneth Reitz's `Hitchhiker's Guide to Python`_ for an explanation of some of the tools used here.
-
-.. _Paver: http://paver.github.io/paver/
-.. _Setuptools: http://pythonhosted.org/setuptools/merge.html
-.. _Distribute: http://pythonhosted.org/distribute/
-.. _merged: http://pythonhosted.org/setuptools/merge.html
-.. _Sphinx: http://sphinx-doc.org/
-.. _flake8: https://pypi.python.org/pypi/flake8
-.. _pytest: http://pytest.org/latest/
-.. _mock: http://www.voidspace.org.uk/python/mock/
-.. _tox: http://testrun.org/tox/latest/
-.. _Hitchhiker's Guide to Python: http://docs.python-guide.org/en/latest/
+This project is meant to simplify the tensorflow experience, and therefore it reduces the customizibility of the networks. Patches that expand functionality are welcome and encouraged, as long they do not reduce the simplicity of usage. I will try to keep up with maintenance as best as I can, but please be patient; I am new to this.
 
 Project Setup
 =============
 
-This will be the ``README`` for your project. For now, follow these instructions to get this project template set up correctly. Then, come back and replace the contents of this ``README`` with contents specific to your project.
-
-Instructions
+Dependancies
 ------------
 
-#. Clone the template project, replacing ``my-project`` with the name of the project you are creating::
+Full support for Python 2.7. Python 3.3 not tested.
 
-        git clone https://github.com/seanfisk/python-project-template.git my-project
-        cd my-project
+Requires tensorflow (tested on version 0.6.0). Installation instructions `on the Tensorflow website <https://www.tensorflow.org/versions/master/get_started/os_setup.html>`_ .
 
-#. Edit the metadata file ``my_module/metadata.py`` to correctly describe your project.
+Requires DEAP (tested on version 1.0) for evolving. Installation instructions `here <http://deap.readthedocs.org/en/1.0.x/installation.html>`_.
 
-#. Generate files based upon the project metadata you just entered::
+Installation
+------------
 
-        python internal/generate.py
+1. Either download and extract the zipped file, or clone directly from github using::
 
-   The generation script will remove all the template files and generate real files, then self-destruct upon completion.
+    git clone https://github.com/calvinschmdt/EasyTensorflow.git easy_tensorflow
 
-#. Delete the old git history and optionally re-initialize the repository::
+   This should create a new directory containing the required files.
+    
+2. Install the dependancies manually or by running this command while in the easy_tensorflow directory::
 
-        rm -rf .git # or `ri -recurse -force .git' for PowerShell
-        git init
+    sudo pip install -r requirements.txt
 
-#. Change the license in ``setup.py`` and replace the generated ``LICENSE`` file with the one of your choice. If you would like to use the MIT license, no change is necessary.
+3. Install the project by running this command while in the easy_tensorflow directory::
 
-#. Change the ``classifiers`` keyword in ``setup.py``. This *will* require modification.
+    sudo python setup.py install
+    
+Usage
+=====
 
-#. Replace this ``README`` with your own text.
+Prediction Objects
+------------------
 
-#. *(Optional, but good practice)* Create a new virtual environment for your project:
+This module uses objects to hold the neural networks. There are seperate objects for performing regression and classification (the two objects are Regresser and Classifier), but the two objects have the same basic functions.
 
-   With pyenv_ and pyenv-virtualenv_::
+Instantiation
+-------------
 
-       pyenv virtualenv my-project
-       pyenv local my-project
+Instantiate the object by assigning it to a variable. The only required argument for instantiation is a list that describes the neural network::
 
-   With virtualenvwrapper_::
+    net_type = ['none', 20, 'sigmoid', 30, 'bias_add', 30, 'sigmoid']
+    reg = etf.tf_functions.Regresser(net_type)''
+      
+The net_type list needs to be in a specific format: alternating strings and integers starting and ending with a string. The strings describe the transformation that is made between each layer of the neural network, while the integers denote the number of size of the layer after the transformation is made. For example, the above network would look like this:
 
-       mkvirtualenv my-project
+    +---------------------------------------------------------------------------+
+    |                  Input with n samples and f features                      |
+    +---------------------------------------------------------------------------+
+    |              *Matrix multiplication by adjustable weights*                |
+    +---------------------------------------------------------------------------+
+    |                 Layer 1 with n samples and 20 features                    |
+    +---------------------------------------------------------------------------+
+    | *Sigmoid transformation on a matrix multiplication by adjustable weights* |
+    +---------------------------------------------------------------------------+
+    |                 Layer 2 with n samples and 30 features                    |
+    +---------------------------------------------------------------------------+
+    |            *Addition to each feature of an adjustable weight*             |
+    +---------------------------------------------------------------------------+
+    |                 Layer 3 with n samples and 30 features                    |
+    +---------------------------------------------------------------------------+
+    | *Sigmoid transformation on a matrix multiplication by adjustable weights* |
+    +---------------------------------------------------------------------------+
+    |                  Output with n samples and o features                     |
+    +---------------------------------------------------------------------------+
 
-   With plain virtualenv_::
 
-       virtualenv /path/to/my-project-venv
-       source /path/to/my-project-venv/bin/activate
+The number of input and output features do not have to be specified upon instantiation, but are learned during training.
 
-   If you are new to virtual environments, please see the `Virtual Environment section`_ of Kenneth Reitz's Python Guide.
+The transformations available are:
+    
+    - 'relu': Relu transformation on a matrix multiplication by adjustable weights. Relu applies a ramp function.
+    - 'softplus': Softplus transformation on a matrix multiplication by adjustable weights. Softplus applies a smoothed ramp function.
+    - 'dropout': Randomly pushes features to zero. Prevents overfitting. Does not change the number of features.
+    - 'bias_add': Adds an adjustable weight to each feature. Does not change the number of features.
+    - 'sigmoid': Sigmoid transformation on a matrix multiplication by adjustable weights. Sigmoid forces values to approach 0 or 1.
+    - 'tanh': Hyperbolic tangent transformation on a matrix multiplication by adjustable weights. Tanh forces values very positive or very negative.
+    - 'none': Matrix multiplication with adjustable weights.
+    - 'normalize': Normalizes features of a sample using an L2 norm. Does not change the number of features.
+    - 'sum': Sum across all features. Reduces to 1 feature, so most useful as a final transformation in a regression.
+    - 'prod': Multiplies all features. Reduces to 1 feature, so most useful as a final transformation in a regression.
+    - 'min': Takes minimum value of all features. Reduces to 1 feature, so most useful as a final transformation in a regression.
+    - 'max': Takes maximum value of all features. Reduces to 1 feature, so most useful as a final transformation in a regression.
+    - 'mean': Takes mean of all features. Reduces to 1 feature, so most useful as a final transformation in a regression.
+    - 'softmax': Normalizes the features so that the sum equals 1 on a matrix multiplication by adjustable weights. Most useful as a final transformation in a classification to give class probabilities.
 
-#. Install the project's development and runtime requirements::
+The object has several optional arguments:
 
-        pip install -r requirements-dev.txt
+    loss_type: String that defines the error measurement term. This is used during training to determine the weights that give the most accurate output. The loss types available are:
+        
+        - 'l2_loss' - Uses tensorflow's nn.l2_loss function on the difference between the predicted and actual. Computes half the L2 norm without the sqrt. Use for regression, and the default loss_type for the regression object.
+        - 'cross_entropy' - Calculates the cross-entropy between two probability distributions as defined in Tensorflow's MNIST tutorial (-tf.reduce_sum(y * tf.log(py_x))). Use for classification, and the default loss_type for the classification object.
+        
+    optimizer: String that defines the optimization algorithm for training. If a string is passed, the optimizers will be used with default learning rates. If you wish to use a custom training rate, instead of a string, pass in a tuple with the tensorflow optimizer as the first index, and a tuple with the arguments to pass in as the second index. The optimizers available are:
+        
+        - 'GradientDescent': Implements the gradient descent algorithm with a default learning rate of 0.001.
+        - 'Adagrad': Implements the Adagrad algorithm with a default learning rate of 0.001.
+        - 'Momentum': Implements the Momentum algorithm with a default learning rate of 0.001 and momentum of 0.1.
+        - 'Adam': Implements the Adam algorithm.
+        - 'FTRL': Implements the FTRL algorithm with a learning rate of 0.001.
+        - 'RMSProp': Implements the RMSProp algorithm with a learning rate of 0.001 and a decay of 0.9.
+        
+Training
+--------
 
-#. Install ``argparse`` package when developing for Python 2.6::
+Objects are trained by calling object.train() with certain arguments::
 
-        pip install argparse
+    trX = training_data
+    try = training_output
+    training_steps = 50
+    reg.train(trX, try, training_steps)
 
-#. Run the tests::
+Both objects are trained by passing in a set of data with known outputs. The training input data should be passed in as a numpy array, with each sample as a row and features as the columns. The training output data can take multiple forms: 
 
-        paver test_all
+    - For regression tasks, it can be an iterable list with one output value for each sample, or it can be a numpy array of shape (n, 1).
+    - For classification tasks, it can be a numpy array of shape (n, m), where m is the number of classes. In this array, there is a 1 in each row in the column of the class that that sample belongs to, and a 0 in all other rows. Otherwise, an iterable list can be passed in with the class name for each sample. This is required is the class names, and not a probability matrix, are to be returned during testing.
+    
+In addition to the training data and training output, the number of times to iterate over training must be passed in as the third argument.
 
-   You should see output similar to this::
+There are several optional arguments for training that control how long training the network takes:
 
-       $ paver test_all
-       ---> pavement.test_all
-       No style errors
-       ========================================= test session starts =========================================
-       platform darwin -- Python 2.7.3 -- pytest-2.3.4
-       collected 5 items
+    - full_train: Denotes whether to use the entire training set each iteration. Set to True by default.
+    - train_size: If full train is set to False, denotes how many samples to use from the training set each iteration of training. Pulls randomly from the training set with possible repeats.
+    
+Predicting
+----------
 
-       tests/test_main.py .....
+After the object is trained, the network can be used to predict the output of test data that is given to it by calling object.predict() with certain arguments::
 
-       ====================================== 5 passed in 0.05 seconds =======================================
-         ___  _   ___ ___ ___ ___
-        | _ \/_\ / __/ __| __|   \
-        |  _/ _ \\__ \__ \ _|| |) |
-        |_|/_/ \_\___/___/___|___/
+    teX = test_data
+    p = reg.predict(teX)
+      
+The test data should have the same number of features as the training data, though the number of samples may be different.
 
-   The substitution performed is rather naive, so some style errors may be reported if the description or name cause lines to be too long. Correct these manually before moving to the next step. If any unit tests fail to pass, please report an issue.
+The output for a regression object will be a numpy array of shape (n, ) with the predicted value for each sample.
 
-**Project setup is now complete!**
+The output for a classification object will be a list with a predicted class for each sample. If a probability matrix is desired, the pass the argument return_encoded = False when predicting, and a numpy array of shape (n, m) will be returned.
 
-.. _pyenv: https://github.com/yyuu/pyenv
-.. _pyenv-virtualenv: https://github.com/yyuu/pyenv-virtualenv
-.. _virtualenvwrapper: http://virtualenvwrapper.readthedocs.org/en/latest/index.html
-.. _virtualenv: http://www.virtualenv.org/en/latest/
-.. _Virtual Environment section: http://docs.python-guide.org/en/latest/dev/virtualenvs/
+Closing
+-------
 
-Using Paver
------------
+Calling object.close() will close the network, freeing up resources. It cannot be used again, and a new object must be started for training and predicting to occur.
 
-The ``pavement.py`` file comes with a number of tasks already set up for you. You can see a full list by typing ``paver help`` in the project root directory. The following are included::
+Evolving
+========
 
-    Tasks from pavement:
-    lint             - Perform PEP8 style check, run PyFlakes, and run McCabe complexity metrics on the code.
-    doc_open         - Build the HTML docs and open them in a web browser.
-    coverage         - Run tests and show test coverage report.
-    doc_watch        - Watch for changes in the Sphinx documentation and rebuild when changed.
-    test             - Run the unit tests.
-    get_tasks        - Get all paver-defined tasks.
-    commit           - Commit only if all the tests pass.
-    test_all         - Perform a style check and run all unit tests.
+For those who do not know the neural network architecture for your problem, we can use a genetic selection algorithm to evolve the optimal architecture.
 
-For example, to run the both the unit tests and lint, run the following in the project root directory::
+To do this, use the command evolve() with several required arguments:
 
-    paver test_all
+    - predict_type: String denoting the type of neural network to evolve. Two options: 'regression' and 'classification'.
+	- fitness_measure: String denoting the type of measurement to use for evaluating the performance of the network type. Options:
+		- 'rmse': Root mean squared error between the predicted values and known values. Use for regression.
+		- 'r_squared': Coefficient of determination for determining how well the data fits the model. Use for regression.
+		- 'accuracy': Fraction of samples that were classified correctly. Use for classification, and can be used for multi-class classification.
+		- 'sensitivity': Fraction of positive samples correctly identified as positive. Use for classification with two classes, and the second class is the positive class.
+		- 'specificity': Fraction of negative samples correctly identified as negative. Use for classification with two classes, and the first class is the negative class.
+	- trX: Numpy array with input data to use for training. Will pull randomly from this array to create test and training sets.
+	- trY: Numpy array with output data to use for training.
 
-To build the HTML documentation, then open it in a web browser::
+After the evolution finishes, it will return a net_type and optimizer that can be fed into an regression or classification object, along with the measurement that net_type produced. If "Error during training" is printed, it only means that an error was encountered at some point during the evolution.::
 
-    paver doc_open
+    net_type, opt, m = etf.evolve_functions.evolve('classification', 'accuracy', trX, trY)
 
-Using Tox
----------
+There are many optional arguments that allow for customization of the evolution:
 
-Tox is a tool for running your tests on all supported Python versions.
-Running it via ``tox`` from the project root directory calls ``paver test_all`` behind the scenes for each Python version,
-and does an additional test run to ensure documentation generation works flawlessly.
-You can customize the list of supported and thus tested Python versions in the ``tox.ini`` file.
-
-Pip ``requirements[-dev].txt`` files vs. Setuptools ``install_requires`` Keyword
-------------------------------------------------------------------
-
-The difference in use case between these two mechanisms can be very confusing. The `pip requirements files`_ is the conventionally-named ``requirements.txt`` that sits in the root directory of many repositories, including this one. The `Setuptools install_requires keyword`_ is the list of dependencies declared in ``setup.py`` that is automatically installed by ``pip`` or ``easy_install`` when a package is installed. They have similar but distinct purposes:
-
-``install_requires`` keyword
-    Install runtime dependencies for the package. This list is meant to *exclude* versions of dependent packages that do not work with this Python package. This is intended to be run automatically by ``pip`` or ``easy_install``.
-
-pip requirements file
-    Install runtime and/or development dependencies for the package. Replicate an environment by specifying exact versions of packages that are confirmed to work together. The goal is to `ensure repeatability`_ and provide developers with an identical development environment. This is intended to be run manually by the developer using ``pip install -r requirements-dev.txt``.
-
-For more information, see the answer provided by Ian Bicking (author of pip) to `this StackOverflow question`_.
-
-.. _Pip requirements files: http://www.pip-installer.org/en/latest/requirements.html
-.. _Setuptools install_requires keyword: http://pythonhosted.org/setuptools/setuptools.html?highlight=install_requires#declaring-dependencies
-.. _ensure repeatability: http://www.pip-installer.org/en/latest/cookbook.html#ensuring-repeatability
-.. _this StackOverflow question: http://stackoverflow.com/questions/6947988/when-to-use-pip-requirements-file-versus-install-requires-in-setup-py
-
-Supported Python Versions
-=========================
-
-Python Project Template supports the following versions out of the box:
-
-* CPython 2.6, 2.7, 3.3
-* PyPy 1.9
-
-CPython 3.0-3.2 may also work but are at this point unsupported. PyPy 2.0.2 is known to work but is not run on Travis-CI.
-
-Jython_ and IronPython_ may also work, but have not been tested. If there is interest in support for these alternative implementations, please open a feature request!
-
-.. _Jython: http://jython.org/
-.. _IronPython: http://ironpython.net/
+	- max_layers: Integer denoting the maximum number of layers that exist between the input and output layer. Set at 5 by default.
+	- num_gens: Number of generations to simulate. Set at 10 by default.
+	- gen_size: Number of individual members per generation. Set at 40 by default.
+	- teX: If a specific test set is desired, enter the input data here as a numpy array.
+	- teY: Test output data as a numpy array.
+	- layer_types: List of strings denoting the layer types possible to be used. Can have repeated types for an increased probability of incorporation. Set to ['relu', 'softplus', 'dropout', 'bias_add', 'sigmoid', 'tanh', 'none', 'normalize'] by default.
+	- layer_sizes: List of integers denoting the layer sizes possible to be used. Layer sizes of 0 drop out a layer. List must be of the same length as layer_types. Set to [0, 0, 10, 50, 100, 200, 500, 1000] by default.
+	- end_types: List of strings denoting the options for the type of transformation that gives the output. Forced to be softmax by default during classification. List must be of same length as layer_types. Set to ['sum', 'prod', 'min', 'max', 'mean', 'none', 'sigmoid', 'tanh'] by default.
+	- train_types: List of strings denoting the optimizer types possible to be used. List must be of same length as layer_types. Set to ['GradientDescent', 'GradientDescent', 'GradientDescent', 'Adagrad', 'Momentum', 'Adam', 'Ftrl', 'RMSProp'] by default.
+	- cross_prob: Float value denoting the probability of crossing the genetics of different individuals. Set at 0.2 by default.
+	- mut_prob: Float value denoting the probability of changing the genetics of a single individual. Set at 0.2 by default.
+	- tourn_size: Integer denoting the number of individuals to carry from each generation. Set at 5 by default.
+	- train_iters: Integer denoting the number of training iterations to use for each neural network. Set at 5 by default.
+	- squash_errors: Boolean value denoting whether to give a fail value if the network results in an error. Set to True by default. Recommended to leave true, as it is difficult to complete a long evolution without running into some type of error.
 
 Licenses
 ========
 
 The code which makes up this Python project template is licensed under the MIT/X11 license. Feel free to use it in your free software/open-source or proprietary projects.
-
-The template also uses a number of other pieces of software, whose licenses are listed here for convenience. It is your responsibility to ensure that these licenses are up-to-date for the version of each tool you are using.
-
-+------------------------+----------------------------------+
-|Project                 |License                           |
-+========================+==================================+
-|Python itself           |Python Software Foundation License|
-+------------------------+----------------------------------+
-|argparse (now in stdlib)|Python Software Foundation License|
-+------------------------+----------------------------------+
-|Sphinx                  |Simplified BSD License            |
-+------------------------+----------------------------------+
-|Paver                   |Modified BSD License              |
-+------------------------+----------------------------------+
-|colorama                |Modified BSD License              |
-+------------------------+----------------------------------+
-|flake8                  |MIT/X11 License                   |
-+------------------------+----------------------------------+
-|mock                    |Modified BSD License              |
-+------------------------+----------------------------------+
-|pytest                  |MIT/X11 License                   |
-+------------------------+----------------------------------+
-|tox                     |MIT/X11 License                   |
-+------------------------+----------------------------------+
 
 Issues
 ======
@@ -233,5 +216,4 @@ This command line would just test Python 2.7.
 Authors
 =======
 
-* Sean Fisk
-* Benjamin Schwarze
+* Calvin Schmidt
