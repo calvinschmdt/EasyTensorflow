@@ -160,14 +160,14 @@ For those who do not know the neural network architecture for your problem, we c
 To do this, use the command evolve() with several required arguments:
 
     - predict_type: String denoting the type of neural network to evolve. Two options: 'regression' and 'classification'.
-	- fitness_measure: String denoting the type of measurement to use for evaluating the performance of the network type. Options:
-		- 'rmse': Root mean squared error between the predicted values and known values. Use for regression.
-		- 'r_squared': Coefficient of determination for determining how well the data fits the model. Use for regression.
-		- 'accuracy': Fraction of samples that were classified correctly. Use for classification, and can be used for multi-class classification.
-		- 'sensitivity': Fraction of positive samples correctly identified as positive. Use for classification with two classes, and the second class is the positive class.
-		- 'specificity': Fraction of negative samples correctly identified as negative. Use for classification with two classes, and the first class is the negative class.
-	- trX: Numpy array with input data to use for training. Will pull randomly from this array to create test and training sets.
-	- trY: Numpy array with output data to use for training.
+    - fitness_measure: String denoting the type of measurement to use for evaluating the performance of the network type. Options:
+        - 'rmse': Root mean squared error between the predicted values and known values. Use for regression.
+        - 'r_squared': Coefficient of determination for determining how well the data fits the model. Use for regression.
+        - 'accuracy': Fraction of samples that were classified correctly. Use for classification, and can be used for multi-class classification.
+        - 'sensitivity': Fraction of positive samples correctly identified as positive. Use for classification with two classes, and the second class is the positive class.
+        - 'specificity': Fraction of negative samples correctly identified as negative. Use for classification with two classes, and the first class is the negative class.
+    - trX: Numpy array with input data to use for training. Will pull randomly from this array to create test and training sets.
+    - trY: Numpy array with output data to use for training.
 
 After the evolution finishes, it will return a net_type and optimizer that can be fed into an regression or classification object, along with the measurement that net_type produced. If "Error during training" is printed, it only means that an error was encountered at some point during the evolution.::
 
