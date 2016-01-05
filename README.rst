@@ -2,7 +2,7 @@
  Easy Tensorflow
 =========================
 
-This module provides users with methods for the automated building, training, and testing of complex neural networks using Goggle's Tensorflow module. The project includes objects that perform both regression and classification tasks.
+This package provides users with methods for the automated building, training, and testing of complex neural networks using Goggle's Tensorflow package. The project includes objects that perform both regression and classification tasks.
 
 In addition, there is a function included that uses the DEAP genetic algorithm package to evolve the optimal network architecture. The evolution function is almost entirely based off of the sample DEAP evolution.
 
@@ -43,7 +43,7 @@ Usage
 Prediction Objects
 ------------------
 
-This module uses objects to hold the neural networks. There are seperate objects for performing regression and classification (the two objects are Regresser and Classifier), but the two objects have the same basic functions.
+This package uses objects to hold the neural networks. There are separate objects for performing regression and classification (the two objects are Regresser and Classifier), but the two objects have the same basic functions.
 
 Instantiation
 -------------
@@ -51,7 +51,7 @@ Instantiation
 Instantiate the object by assigning it to a variable. The only required argument for instantiation is a list that describes the neural network::
 
     net_type = ['none', 20, 'sigmoid', 30, 'bias_add', 30, 'sigmoid']
-    reg = etf.tf_functions.Regresser(net_type)''
+    reg = etf.tf_functions.Regresser(net_type)
       
 The net_type list needs to be in a specific format: alternating strings and integers starting and ending with a string. The strings describe the transformation that is made between each layer of the neural network, while the integers denote the number of size of the layer after the transformation is made. For example, the above network would look like this:
 
@@ -212,6 +212,13 @@ This will copy the template directory to a temporary directory, run the generati
     source internal/test.sh -e py27
 
 This command line would just test Python 2.7.
+
+Acknowledgements
+================
+
+Both Tensorflow and DEAP were creating by other (very smart) people, this package just combines the two.
+
+This package was set up using Sean Fisk's Python Project Template package.
 
 Authors
 =======
