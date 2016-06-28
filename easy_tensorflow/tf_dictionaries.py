@@ -1,13 +1,13 @@
 import tensorflow as tf
 
 transform_dict = {
-    'relu': (tf.nn.relu, (tf.matmul, ('X', 'weight'))),
-    'softplus': (tf.nn.softplus, (tf.matmul, ('X', 'weight'))),
+    'relu': (tf.nn.relu, (tf.nn.bias_add, ((tf.matmul, ('X', 'weight1')), 'weight2'))),
+    'softplus': (tf.nn.softplus, (tf.nn.bias_add, ((tf.matmul, ('X', 'weight1')), 'weight2'))),
     'dropout': (tf.nn.dropout, ('X', 'weight')),
     'bias_add': (tf.nn.bias_add, ('X', 'weight')),
-    'sigmoid': (tf.nn.sigmoid, (tf.matmul, ('X', 'weight'))),
-    'tanh': (tf.nn.tanh, (tf.matmul, ('X', 'weight'))),
-    'none': (tf.matmul, ('X', 'weight')),
+    'sigmoid': (tf.nn.sigmoid, (tf.nn.bias_add, ((tf.matmul, ('X', 'weight1')), 'weight2'))),
+    'tanh': (tf.nn.tanh, (tf.nn.bias_add, ((tf.matmul, ('X', 'weight1')), 'weight2'))),
+    'none': (tf.nn.bias_add, ((tf.matmul, ('X', 'weight1')), 'weight2')),
     'normalize': (tf.nn.l2_normalize, ('X', 1)),
     'sum': (tf.reduce_sum, ('X', 1)),
     'prod': (tf.reduce_prod, ('X', 1)),

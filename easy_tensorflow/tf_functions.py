@@ -1,7 +1,6 @@
 import tensorflow as tf
 import numpy as np
 import random
-import pickle
 import tf_dictionaries
 
 def random_index_list(list_size, sample_size):
@@ -66,12 +65,15 @@ def unpack_transform(transform, X, weight):
 
         # If a weight tensor or value should be applied to the tensor, then uses the supplied weight. If there is not a
         # weight, uses 1 to direct the axis of tensor transformation.
-        if transform[1][1] == 'weight':
+        if transform[1][1] == 'weight' or transform[1][1] == 'weight1':
             w = weight
         elif transform[1][1] == 1:
             w = 1
 
         return transform[0](X, w)
+
+    if transform[1][1] == 'weight2':
+        return transform[0](unpack_transform(transform[1][0], X, weight[0]), weight[1])
 
     # If the first part of the tensor's input is not X, then unpacks the tensor that should be the input, and uses that.
     else:
@@ -130,6 +132,13 @@ def make_model(X, input_size, output_size, net_type, transform_dict):
             next = last
             weight = tf.Variable(tf.constant(0.0, shape=[next]))
 
+        elif net_type[e] == 'relu' or net_type[e] == 'softplus' or net_type[e] == 'tanh' or \
+                net_type[e] == 'sigmoid' or net_type[e] == 'none':
+            next = last
+            weight1 = tf.Variable(tf.random_normal([last, next], stddev=0.01))
+            weight2 = tf.Variable(tf.constant(0.0, shape=[next]))
+            weight = (weight1, weight2)
+
         # Other types use a matrix to transform the size.
         else:
             next = net_type[e + 1]
@@ -156,7 +165,16 @@ def make_model(X, input_size, output_size, net_type, transform_dict):
         final = net_type[-1]
 
     # Adds in the last layer.
-    weights.append(tf.Variable(tf.random_normal([last, output_size], stddev=0.01)))
+    if final == 'relu' or final == 'softplus' or final == 'tanh' or \
+                final == 'sigmoid' or final == 'none':
+            weight1 = tf.Variable(tf.random_normal([last, output_size], stddev=0.01))
+            weight2 = tf.Variable(tf.random_normal([output_size], stddev=0.01))
+            weight = (weight1, weight2)
+
+    else:
+        weight = tf.Variable(tf.random_normal([last, output_size], stddev=0.01))
+
+    weights.append(weight)
     models.append(final)
 
     # Returns the compiled function.
