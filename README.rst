@@ -2,7 +2,7 @@
  Easy Tensorflow
 =========================
 
-This package provides users with methods for the automated building, training, and testing of complex neural networks using Goggle's Tensorflow package. The project includes objects that perform both regression and classification tasks.
+This package provides users with methods for the automated building, training, and testing of complex neural networks using Google's Tensorflow package. The project includes objects that perform both regression and classification tasks.
 
 In addition, there is a function included that uses the DEAP genetic algorithm package to evolve the optimal network architecture. The evolution function is almost entirely based off of the sample DEAP evolution.
 
